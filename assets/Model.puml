@@ -1,0 +1,7 @@
+@startuml
+
+Person *-- Name : first
+Person *-- Name : last
+Person *-- Age
+
+@enduml
