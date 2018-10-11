@@ -16,6 +16,7 @@ newtype Body =
   deriving (Show)
 
 data Error = MustNotBeEmpty | MustContain String deriving (Show)
+data FieldError = FieldError Error String deriving (Show)
 
 data Email =
   Email FromAddress
@@ -26,19 +27,22 @@ data Email =
 main :: IO ()
 main = do
   print $ validateEmail "from" "to" ""
+  print $ validateEmail "from" "to@mail" "This is a test"
+  print $ validateEmail "from@mail" "to" "This is a test"
   print $ validateEmail "from@mail" "to@mail" "This is a test"
+  print $ validateEmail "from" "to" "This is a test"
 
-validateAddress :: String -> Validation [Error] Address
-validateAddress address
+validateAddress :: String -> String -> Validation [FieldError] Address
+validateAddress address which
   | "@" `isInfixOf` address = Address <$> Success address
-  | otherwise = Failure [MustContain "@"]
+  | otherwise = Failure [FieldError (MustContain "@") which]
 
-validateBody :: String -> Validation [Error] Body
-validateBody [] = Failure [MustNotBeEmpty]
+validateBody :: String -> Validation [FieldError] Body
+validateBody [] = Failure [FieldError MustNotBeEmpty "body"]
 validateBody body = Body <$> Success body
 
-validateEmail :: String -> String -> String -> Validation [Error] Email
+validateEmail :: String -> String -> String -> Validation [FieldError] Email
 validateEmail from to body = Email
-  <$> validateAddress from
-  <*> validateAddress to
+  <$> validateAddress from "from-address"
+  <*> validateAddress to "to-address"
   <*> validateBody body
