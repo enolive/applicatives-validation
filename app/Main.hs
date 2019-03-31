@@ -1,7 +1,7 @@
 module Main where
 
-import Data.List
-import Data.Validation
+import           Data.List
+import           Data.Validation
 
 type FromAddress = Address
 
@@ -15,8 +15,15 @@ newtype Body =
   Body String
   deriving (Show)
 
-data Error = MustNotBeEmpty | MustContain String deriving (Show)
-data FieldError = FieldError Error String deriving (Show)
+data Error
+  = MustNotBeEmpty
+  | MustContain String
+  deriving (Show)
+
+data FieldError =
+  FieldError Error
+             String
+  deriving (Show)
 
 data Email =
   Email FromAddress
@@ -38,11 +45,9 @@ validateAddress address which
   | otherwise = Failure [FieldError (MustContain "@") which]
 
 validateBody :: String -> Validation [FieldError] Body
-validateBody [] = Failure [FieldError MustNotBeEmpty "body"]
+validateBody []   = Failure [FieldError MustNotBeEmpty "body"]
 validateBody body = Body <$> Success body
 
 validateEmail :: String -> String -> String -> Validation [FieldError] Email
-validateEmail from to body = Email
-  <$> validateAddress from "from-address"
-  <*> validateAddress to "to-address"
-  <*> validateBody body
+validateEmail from to body =
+  Email <$> validateAddress from "from-address" <*> validateAddress to "to-address" <*> validateBody body
