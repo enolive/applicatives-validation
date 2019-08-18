@@ -1,7 +1,7 @@
 @startuml
 
-Email *-- Address : from
-Email *-- Address : to
-Email *-- Body
+Person *-- Name : first
+Person *-- Name : last
+Person *-- Age
 
 @enduml
